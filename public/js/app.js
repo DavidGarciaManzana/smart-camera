@@ -2,18 +2,39 @@ const video = document.getElementById('webcam');
 const liveView = document.getElementById('liveView');
 const demosSection = document.getElementById('demos');
 const enableWebcamButton = document.getElementById('webcamButton');
+let value0 =1;
+let value1 =10;
+let value4 =1;
+let isMobileA;
 
 // Check if webcam access is supported.
 function getUserMediaSupported() {
     return !!(navigator.mediaDevices &&
         navigator.mediaDevices.getUserMedia);
 }
+function isMobile() {
+    if(window.innerWidth <= 768){
+        isMobileA =true
+        value0 = 70
+         value1 = 355
+         value4 = 140
+    } else {
+        value1 = 10
+        value0,value4 = 1;
+    }
+}
+isMobile()
 
 // If webcam supported, add event listener to button for when user
 // wants to activate it to call enableCam function which we will
 // define in the next step.
 if (getUserMediaSupported()) {
-    enableWebcamButton.addEventListener('click', enableCam);
+    if(isMobileA){
+        enableWebcamButton.addEventListener('click', enableBackCamera);
+    } else {
+        enableWebcamButton.addEventListener('click', enableCam);
+    }
+
 } else {
     console.warn('getUserMedia() is not supported by your browser');
 }
@@ -39,6 +60,30 @@ function enableCam(event) {
         video.addEventListener('loadeddata', predictWebcam);
     });
 }
+function enableBackCamera(event) {
+    // Only continue if the COCO-SSD has finished loading.
+    if (!model) {
+        return;
+    }
+
+    // Hide the button once clicked.
+    event.target.classList.add('removed');
+
+    // getUsermedia parameters to force the back camera.
+    const constraints = {
+        video: {
+            facingMode: { exact: "environment" }
+        }
+    };
+
+    // Activate the back camera stream.
+    navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
+        video.srcObject = stream;
+        video.addEventListener('loadeddata', predictWebcam);
+    });
+}
+
+
 // Store the resulting model in the global scope of our app.
 var model = undefined;
 
@@ -75,15 +120,26 @@ function predictWebcam() {
                     + '% confidence.';
                 p.style = 'margin-left: ' + predictions[n].bbox[0] + 'px; margin-top: '
                     + (predictions[n].bbox[1] - 10) + 'px; width: '
-                    + (predictions[n].bbox[2] - 10) + 'px; top: 0; left: 0;';
+                    + (predictions[n].bbox[2] - value1) + 'px; top: 0; left: 0;';
 
                 const highlighter = document.createElement('div');
                 highlighter.setAttribute('class', 'highlighter');
-                highlighter.style = 'left: ' + predictions[n].bbox[0] + 'px; top: '
-                    + predictions[n].bbox[1] + 'px; width: '
-                    + predictions[n].bbox[2] + 'px; height: '
-                    + predictions[n].bbox[3] + 'px;';
+                let top = predictions[n].bbox[1] -value0
+                let width = predictions[n].bbox[2]
+                let height = predictions[n].bbox[3]
+                let left = predictions[n].bbox[0] -value4
 
+                if(isMobileA){
+                    highlighter.style = 'left: '
+                        + left + 'px; top: '
+                        + top  + 'px; '
+                } else {
+                    highlighter.style = 'left: '
+                        + left + 'px; top: '
+                        + top  + 'px; width: '
+                        +  width + 'px; height: '
+                        +  height + 'px;';
+                }
                 liveView.appendChild(highlighter);
                 liveView.appendChild(p);
                 children.push(highlighter);
