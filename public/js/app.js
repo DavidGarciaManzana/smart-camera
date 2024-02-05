@@ -2,6 +2,7 @@ const video = document.getElementById('webcam');
 const liveView = document.getElementById('liveView');
 const demosSection = document.getElementById('demos');
 const enableWebcamButton = document.getElementById('webcamButton');
+const enableFrontcamButton = document.getElementById('frontcamButton');
 let value0 =1;
 let value1 =10;
 let value4 =1;
@@ -29,8 +30,10 @@ isMobile()
 // wants to activate it to call enableCam function which we will
 // define in the next step.
 if (getUserMediaSupported()) {
+
     if(isMobileA){
-        enableWebcamButton.addEventListener('click', enableBackCamera);
+        enableWebcamButton.addEventListener('click', enableCam);
+        enableFrontcamButton.addEventListener('click', enableBackCamera);
     } else {
         enableWebcamButton.addEventListener('click', enableCam);
     }
@@ -46,8 +49,9 @@ function enableCam(event) {
         return;
     }
 
-    // Hide the button once clicked.
-    event.target.classList.add('removed');
+    // Hide the buttons
+    enableFrontcamButton.classList.add('removed')
+    enableWebcamButton.classList.add('removed')
 
     // getUsermedia parameters to force video but not audio.
     const constraints = {
@@ -66,8 +70,9 @@ function enableBackCamera(event) {
         return;
     }
 
-    // Hide the button once clicked.
-    event.target.classList.add('removed');
+    // Hide the buttons
+    enableFrontcamButton.classList.add('removed')
+    enableWebcamButton.classList.add('removed')
 
     // getUsermedia parameters to force the back camera.
     const constraints = {
